@@ -24,24 +24,35 @@ impl LoginPage {
             app_state: app_state
         }
     }
-    
 }
 
 impl eframe::App for LoginPage {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+        
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading("Please log in");
-            let name_label = ui.label("Username: ");
-            ui.text_edit_singleline(&mut self.username)
-                .labelled_by(name_label.id);
-            let mut password = PasswordInput::new(&mut self.password, '*');
-            password.ui(ui);
-            if ui.button("Log in").clicked() {
-                let mut app_state = self.app_state.borrow_mut();
-                app_state.logged_in();
-            }
+            let size: f32 = ui.available_width();
             
+            let outer = egui::Layout::left_to_right(egui::Align::Min);
+            let inner = egui::Layout::top_down(egui::Align::Min);
+            
+            ui.with_layout(outer, |ui| {
+                ui.add_space((size-300.0)/2.0);
+                ui.allocate_ui_with_layout(egui::Vec2::new(300.0,ui.available_height()), inner, |ui| {
+                    ui.add_space(80.0);
+                    ui.heading("Please log in");
+                    let name_label = ui.label("Username: ");
+                    ui.text_edit_singleline(&mut self.username)
+                        .labelled_by(name_label.id);
+        
+                    let mut password = PasswordInput::new(&mut self.password);
+                    password.ui(ui);
+                    if ui.button("Log in").clicked() {
+                        let mut app_state = self.app_state.borrow_mut();
+                        app_state.logged_in();
+                    }
+                });
+            });
         });
-
     }
 }
+

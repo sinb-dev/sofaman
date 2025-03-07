@@ -1,5 +1,4 @@
 use eframe::egui;
-use crate::pages::page::Page;
 pub struct WorkspacePage {
     message: String
 }
@@ -10,10 +9,6 @@ impl WorkspacePage {
             message: String::new()
         }
     }
-}
-
-impl Page for WorkspacePage {
-
 }
 
 impl eframe::App for WorkspacePage {
