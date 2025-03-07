@@ -1,6 +1,5 @@
 use eframe::egui;
 use crate::pages::page::Page;
-use std::any::Any;
 pub struct WorkspacePage {
     message: String
 }
@@ -14,9 +13,7 @@ impl WorkspacePage {
 }
 
 impl Page for WorkspacePage {
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
+
 }
 
 impl eframe::App for WorkspacePage {

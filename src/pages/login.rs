@@ -5,42 +5,29 @@
 
 //use egui::{Context, TextEdit, Ui, Widget, WidgetText, Response, Pos2, Rect, Sense, Color32, FontId, TextStyle, FontFamily};
 use eframe::egui;
-
+use crate::app_state::AppState;
 // Use the PasswordInput struct from the password_input module
 use crate::widgets::password_input::PasswordInput;
-use crate::pages::page::Page;
-use std::any::Any;
-pub struct LoginEventArgs
-{
-    pub success: bool
-}
-impl LoginEventArgs {
-    pub fn new(success: bool) -> Self {
-        Self {
-            success: success
-        }
-    }
-}
+use std::rc::Rc;
+use std::cell::RefCell;
 
-pub struct LoginPage<'a> {
+pub struct LoginPage {
     username: String,
     password: String,
-    pub on_login: Box<dyn Fn(LoginEventArgs) + 'a>,
+    app_state: Rc<RefCell<AppState>>
 }
-impl LoginPage<'_> {
-    pub fn new() -> Self {
+impl LoginPage {
+    pub fn new(app_state: Rc<RefCell<AppState>>) -> Self {
         Self {
             username: String::new(),
             password: String::new(),
-            on_login : Box::new(|_| {
-
-            }),
+            app_state: app_state
         }
     }
     
 }
 
-impl eframe::App for LoginPage<'_> {
+impl eframe::App for LoginPage {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.heading("Please log in");
@@ -50,8 +37,8 @@ impl eframe::App for LoginPage<'_> {
             let mut password = PasswordInput::new(&mut self.password, '*');
             password.ui(ui);
             if ui.button("Log in").clicked() {
-                //Attempt to log in
-                (self.on_login)(LoginEventArgs::new(true));
+                let mut app_state = self.app_state.borrow_mut();
+                app_state.logged_in();
             }
             
         });
