@@ -3,35 +3,50 @@
 
 //use egui::{Context, TextEdit, Ui, Widget, WidgetText, Response, Pos2, Rect, Sense, Color32, FontId, TextStyle, FontFamily};
 //use eframe::{egui::{self, TextBuffer}, glow::SHADER_COMPILER};
-use eframe::egui::{self};
-use std::rc::Rc;
-use std::cell::RefCell;
 
 
+mod tests {
+    mod accounting;
+}
 mod pages {
+    pub mod page;
     pub mod login;
     pub mod workspace;
-    pub mod page;
+    pub mod account_list;
 }
 mod widgets {
     pub mod password_input;
+    pub mod side_menu;
 }
-use pages::{
-    login::LoginPage,
-    workspace::WorkspacePage
-};
-use pages::page::Pages;
+
 mod app_state;
+mod models {
+    pub mod accounting;
+}
+
+
+use eframe::egui::{self};
+use std::rc::Rc;
+use std::cell::RefCell;
+use pages::{account_list::AccountListPage, page::{Page, Pages}};
 use app_state::AppState;
 
+use pages::{
+    login::LoginPage,
+    workspace::WorkspacePage,
+};
 fn main() -> eframe::Result {
+    //Load some data
+
+    
+
     env_logger::init(); // Log to stderr (if you run with `RUST_LOG=debug`).
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default().with_maximized(true),
         ..Default::default()
     };
     eframe::run_native(
-        "My egui App",
+        "Sofaman",
         options,
         Box::new(|cc| {
             // This gives us image support:
@@ -47,19 +62,22 @@ fn main() -> eframe::Result {
 
 
 struct MyApp {
+    app_state: Rc<RefCell<AppState>>,
     login_page: LoginPage,
     workspace_page: WorkspacePage,
-    app_state: Rc<RefCell<AppState>>,
+    accounts_page: AccountListPage
 }
 impl MyApp {
     fn new(app_state: Rc<RefCell<AppState>>) -> Self {
         
         let login_page = LoginPage::new(Rc::clone(&app_state));
-        let workspace_page = WorkspacePage::new();
+        let workspace_page = WorkspacePage::from_app_state(Rc::clone(&app_state));
+        let accounts_page = AccountListPage::from_app_state(Rc::clone(&app_state));
         Self {
+            app_state : app_state,
             login_page : login_page,
             workspace_page : workspace_page,
-            app_state : app_state,
+            accounts_page : accounts_page,
         }
     }
 }
@@ -74,6 +92,7 @@ impl eframe::App for MyApp {
         match _active_page {
             Pages::Login => self.login_page.update(ctx, _frame),
             Pages::Workspace => self.workspace_page.update(ctx, _frame),
+            Pages::Accounts => self.accounts_page.update(ctx, _frame),
         };
     }
 }
