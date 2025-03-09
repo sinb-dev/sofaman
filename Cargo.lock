@@ -548,6 +548,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "catppuccin-egui"
+version = "5.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "02a4b7295dd468695a3cc49294cc93eab6bce03b51493ff3fff42e812b7523cf"
+dependencies = [
+ "egui",
+]
+
+[[package]]
 name = "cc"
 version = "1.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2590,6 +2599,7 @@ dependencies = [
 name = "sofaman"
 version = "0.1.0"
 dependencies = [
+ "catppuccin-egui",
  "eframe",
  "egui_extras",
  "env_logger",

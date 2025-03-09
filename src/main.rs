@@ -21,11 +21,12 @@ mod widgets {
 
 mod app_state;
 mod models {
+    pub mod models;
     pub mod accounting;
 }
 
 
-use eframe::egui::{self};
+use eframe::egui::{self, ahash::HashMap};
 use std::rc::Rc;
 use std::cell::RefCell;
 use pages::{account_list::AccountListPage, page::{Page, Pages}};
@@ -37,9 +38,7 @@ use pages::{
 };
 fn main() -> eframe::Result {
     //Load some data
-
     
-
     env_logger::init(); // Log to stderr (if you run with `RUST_LOG=debug`).
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default().with_maximized(true),
@@ -51,6 +50,7 @@ fn main() -> eframe::Result {
         Box::new(|cc| {
             // This gives us image support:
             egui_extras::install_image_loaders(&cc.egui_ctx);
+            catppuccin_egui::set_theme(&cc.egui_ctx, catppuccin_egui::MOCHA);
 
             let app_state = Rc::new(RefCell::new(AppState::new()));
             let my_app = Box::new(MyApp::new(Rc::clone(&app_state)));

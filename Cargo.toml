@@ -16,3 +16,6 @@ env_logger = { version = "0.10", default-features = false, features = [
     "auto-color",
     "humantime",
 ] }
+
+
+catppuccin-egui = { version = "5.4.0", default-features = false, features = ["egui30"] }

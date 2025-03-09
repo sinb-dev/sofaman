@@ -3,7 +3,7 @@ use crate::models::accounting::Account;
 #[test]
 fn test_balance() {
 
-    let mut account = Account::new("test");
+    let mut account = Account::new(1,"test");
 
     assert_eq!(account.get_balance(), 0);
 
@@ -19,7 +19,7 @@ fn test_balance() {
 }
 #[test]
 fn test_withdraw() {
-    let mut account = Account::new("test");
+    let mut account = Account::new(1,"test");
 
     assert_eq!(account.get_balance(), 0);
     match account.withdraw("Too much", 1000) {
@@ -36,7 +36,7 @@ fn test_withdraw() {
 }
 #[test]
 fn test_deposit() {
-    let mut account = Account::new("test");
+    let mut account = Account::new(1,"test");
 
     assert_eq!(account.get_balance(), 0);
     match account.deposit("Salary", 1000) {

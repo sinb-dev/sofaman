@@ -1,22 +1,25 @@
 
 #[derive(Clone)]
 pub struct Account {
-    name: String,
+    id: u32,
+    pub name: String,
     transactions: Vec<Transaction>,
     closed_date: i32,
-    balance: i32,
+    pub balance: i32,
 }
 impl Account {
-    pub fn new(name: &str) -> Self {
+    pub fn new(id: u32, name: &str) -> Self {
         Self {
+            id: id,
             name : name.to_string(),
             transactions : Vec::new(),
             closed_date : 0,
             balance: 0,
         }
     }
-    pub fn get_name(&self) -> &str {
-        &self.name
+    
+    pub fn get_id(&self) -> u32 {
+        self.id
     }
     pub fn deposit(&mut self, message: &str, amount: u32) -> Result<bool, &str> {
         
@@ -54,6 +57,9 @@ impl Account {
     pub fn close_account(&mut self) {
         self.closed_date = 1;
     }
+    pub fn get_transactions(&self) -> Vec<Transaction>{
+        self.transactions.to_vec()
+    }
     fn calc_balance(&mut self) {
         let mut new_balance = 0;
         for tr in &self.transactions {
@@ -61,11 +67,10 @@ impl Account {
         }
         self.balance = new_balance;
     }
-    
-}
-#[derive(Clone)]
-pub struct Transaction {
-    message: String,
-    pub amount: i32
 }
 
+#[derive(Clone)]
+pub struct Transaction {
+    pub message: String,
+    pub amount: i32
+}
