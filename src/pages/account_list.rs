@@ -11,7 +11,6 @@ use crate::widgets::side_menu::SideMenu;
 pub struct AccountListPage {
     app_state: Rc<RefCell<AppState>>,
     account_list: AccountList,
-    selected_account: Option<Account>,
     show_edit_account: bool,
     //accounts: &'a Vec<Account>
 }
@@ -22,7 +21,6 @@ impl Page for AccountListPage
         Self {
             app_state: Rc::clone(&app_state),
             account_list: AccountList::from_app_state(Rc::clone(&app_state)),
-            selected_account: None,
             show_edit_account: false,
         }
     }
@@ -53,22 +51,22 @@ impl eframe::App for AccountListPage {
         // });
         egui::CentralPanel::default().show(ctx, |ui| {
             self.account_list.ui(ui);
-            if self.account_list.selected_account_id > 0
-            {
-                let app_state_clone = Rc::clone(&self.app_state);
-                let app_state = app_state_clone.borrow();
-                let result: Result<&Account, bool> = app_state.get_account_by_id(self.account_list.selected_account_id);
-                //let mut account = result.cloned().unwrap();
-                match (result.cloned()) {
-                    Ok(account) => {
-                        self.selected_account = Some(account);
-                        self.show_edit_account = true;
-                    },
-                    Err(bool) => {
-                        self.show_edit_account = false;
-                    }
-                }
-            }
+            // if self.account_list.selected_account_id > 0
+            // {
+            //     let app_state_clone = Rc::clone(&self.app_state);
+            //     let app_state = app_state_clone.borrow();
+            //     let result: Result<&Account, bool> = app_state.get_account_by_id(self.account_list.selected_account_id);
+            //     //let mut account = result.cloned().unwrap();
+            //     match (result.cloned()) {
+            //         Ok(account) => {
+            //             self.selected_account = Some(account);
+            //             self.show_edit_account = true;
+            //         },
+            //         Err(bool) => {
+            //             self.show_edit_account = false;
+            //         }
+            //     }
+            // }
         });
         
         //if let Some(account) = &self.selected_account {
@@ -78,28 +76,28 @@ impl eframe::App for AccountListPage {
                 let name_label = ui.label("Name");
                 ui.vertical(|ui| {
 
-                    // let app_state_clone = Rc::clone(&self.app_state);
-                    // let app_state = app_state_clone.borrow();
-                    // let result: Result<&Account, bool> = app_state.get_account_by_id(self.selected_account_id);
+                    let app_state_clone = Rc::clone(&self.app_state);
+                    let mut app_state = app_state_clone.borrow_mut();
+                    //let result: Result<&Account, bool> = app_state.buffer.account;
                     // let mut account = result.cloned().unwrap();
-                    if let Some(account) = &mut self.account_list.selected_account {
+                    if let Some(account) = &mut app_state.buffer.account {
                         ui.text_edit_singleline(&mut account.name)
                             .labelled_by(name_label.id);
                         ui.add_space(25.0);
                         ui.horizontal(|ui| {
                             if ui.button("Save").clicked() {
-                                let app_state_clone = Rc::clone(&self.app_state);
-                                let mut app_state = app_state_clone.borrow_mut();
-                                if let Some(acc) = &self.selected_account {
-                                    app_state.update_account(account.clone());
-                                }
+                                // let app_state_clone = Rc::clone(&self.app_state);
+                                // let mut app_state = app_state_clone.borrow_mut();
+                                // if let Some(acc) = &self.selected_account {
+                                //     app_state.update_account(account.clone());
+                                // }
                                 //let result: Result<&Account, bool> = app_state.get_account_by_id(self.selected_account_id);
                             }
                             ui.add_space(20.0);
                             if ui.button("Cancel").clicked() {
-                                self.account_list.selected_account_id = 0;
+                                // self.account_list.selected_account_id = 0;
                                 self.show_edit_account = false;
-                                self.selected_account = None;
+                                //self.selected_account = None;
                                 self.account_list.transaction_list = TransactionList::from_app_state(Rc::clone(&self.app_state));
                                 //self.selected_account = None;
                             }
@@ -125,8 +123,6 @@ impl eframe::App for AccountListPage {
 pub struct AccountList {
     app_state: Rc<RefCell<AppState>>,
     filter: String,
-    selected_account: Option<Account>,
-    selected_account_id: u32,
     transaction_list: TransactionList,
 }
 impl Page for AccountList
@@ -135,8 +131,6 @@ impl Page for AccountList
         Self {
             app_state: Rc::clone(&app_state),
             filter: String::new(),
-            selected_account: None,
-            selected_account_id: 0,
             transaction_list: TransactionList::from_app_state(Rc::clone(&app_state)),
         }
     }
@@ -145,7 +139,7 @@ impl AccountList {
 
     fn ui(&mut self, ui: &mut Ui) -> Response {
         //let app_state = self.app_state.borrow();
-        let Self { app_state, filter, selected_account, selected_account_id, transaction_list } = self;
+        let Self { app_state, filter, transaction_list } = self;
         let app_state_br = app_state.borrow();
         let accounts: &Vec<Account> = app_state_br.get_accounts();
 
@@ -200,9 +194,7 @@ impl AccountList {
                         });
 
                         if clicked || response.clicked() {
-                            *selected_account = Some(account.clone());
                             *transaction_list = TransactionList::from_account(Rc::clone(&app_state), account.clone());
-                            *selected_account_id = account.get_id();
                         }
                         //ui.label(format!("${:.2}", account.balance));
                     });
