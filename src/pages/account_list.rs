@@ -125,7 +125,7 @@ pub struct AccountList {
     app_state: Rc<RefCell<AppState>>,
     filter: String,
     selected_account: Option<Account>,
-    selected_account_id: u32,
+    selected_account_id: usize,
     transaction_list: TransactionList,
 }
 impl Page for AccountList

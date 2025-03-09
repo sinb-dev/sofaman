@@ -1,15 +1,16 @@
-use crate::data_access::{RequestParameters, ServiceRequest};
+use crate::data_access::{RequestParameters, ServiceQuery};
 
+use std::rc::Rc;
 #[derive(Clone)]
 pub struct Account {
-    id: u32,
+    id: usize,
     pub name: String,
     transactions: Vec<Transaction>,
     closed_date: i32,
     pub balance: i32,
 }
 impl Account {
-    pub fn new(id: u32, name: &str) -> Self {
+    pub fn new(id: usize, name: &str) -> Self {
         Self {
             id: id,
             name : name.to_string(),
@@ -19,7 +20,7 @@ impl Account {
         }
     }
     
-    pub fn get_id(&self) -> u32 {
+    pub fn get_id(&self) -> usize {
         self.id
     }
     pub fn deposit(&mut self, message: &str, amount: u32) -> Result<bool, &str> {
@@ -77,14 +78,61 @@ pub struct Transaction {
 }
 /////////////////////////////
 
-pub trait AccountService : ServiceRequest {
-    fn get_accounts(&self) -> Vec<Account>;
+pub trait AccountService<'a, Q> {
+    fn query(&'a self) -> Q;
     fn get_account_by_id(&self, id: u32) -> Account;
 }
 
 pub struct InMemoryAccountStore {
     request: RequestParameters,
     accounts: Vec<Account>
+}
+pub struct InMemoryAccountStoreQuery<'a> {
+    request: RequestParameters,
+    service: &'a InMemoryAccountStore,
+}
+impl<'a> ServiceQuery<Account> for InMemoryAccountStoreQuery<'a> {
+    fn filter(mut self, value: &str) -> Self {
+        self.request.filter = Some(String::from(value));
+        self
+    }
+    fn limit(mut self, limit: usize) -> Self {
+        self.request.limit = limit;
+        self
+    }
+    fn offset(mut self, offset: usize) -> Self {
+        self.request.offset = offset;
+        self
+    }
+    fn fetch(mut self) -> Vec<Account> {
+        if let Some(filter) = &self.request.filter {
+            self.service.accounts.iter()
+                .filter(|account| account.name.contains(filter))
+                .skip(self.request.offset)
+                .take(self.request.limit)
+                .cloned()
+                .collect()
+        } else {
+            self.service.accounts.iter()
+                .skip(self.request.offset)
+                .take(self.request.limit)
+                .cloned()
+                .collect()
+        }
+    }
+    fn with_id(mut self, id: usize) -> Option<Account> {
+        let result: Vec<Account> = self.service.accounts.iter()
+            .filter(|account| account.id == id)
+            .skip(self.request.offset)
+            .take(self.request.limit)
+            .cloned()
+            .collect();
+        if let Some(account) = result.first() {
+            Some(account.clone())
+        } else {
+            None
+        }
+    }
 }
 impl InMemoryAccountStore {
     pub fn new() -> Self {
@@ -111,37 +159,12 @@ impl InMemoryAccountStore {
         }
     }
 }
-impl ServiceRequest for InMemoryAccountStore {
-    fn filter(&mut self, value: &str) -> &mut Self {
-        self.request.filter = Some(String::from(value));
-        self
-    }
-    fn limit(&mut self, limit: usize) -> &mut Self {
-        self.request.limit = limit;
-        self
-    }
-    fn offset(&mut self, offset: usize) -> &mut Self {
-        self.request.offset = offset;
-        self
-    }
-}
-impl AccountService for InMemoryAccountStore {
-    
-    fn get_accounts(&self) -> Vec<Account>
-    {
-        if let Some(filter) = &self.request.filter {
-            self.accounts.iter()
-                .filter(|account| account.name.contains(filter))
-                .skip(self.request.offset)
-                .take(self.request.limit)
-                .cloned()
-                .collect()
-        } else {
-            self.accounts.iter()
-                .skip(self.request.offset)
-                .take(self.request.limit)
-                .cloned()
-                .collect()
+
+impl<'a> AccountService<'a, InMemoryAccountStoreQuery<'a>> for InMemoryAccountStore {
+    fn query(&'a self) -> InMemoryAccountStoreQuery<'a> {
+        InMemoryAccountStoreQuery {
+            request: RequestParameters::new(),
+            service: self
         }
     }
     fn get_account_by_id(&self, id: u32) -> Account {

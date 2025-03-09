@@ -1,34 +1,40 @@
-use crate::{data_access::ServiceRequest, models::accounting::InMemoryAccountStore, models::accounting::AccountService};
+use crate::{data_access::ServiceQuery, models::accounting::{AccountService, InMemoryAccountStore, InMemoryAccountStoreQuery}};
 
 
 #[test]
 fn test_filter() {
-    let mut store: InMemoryAccountStore = InMemoryAccountStore::new();
+    let store: InMemoryAccountStore = InMemoryAccountStore::new();
     
-    assert_eq!(store.get_accounts().len() , 3);
+    assert_eq!(store.query().fetch().len() , 3);
 
-    assert_eq!(store.filter("x").get_accounts().len(), 1);
+    assert_eq!(store.query().filter("x").fetch().len(), 1);
 
 }
 
 #[test]
 fn test_limit() {
-    let mut store: InMemoryAccountStore = InMemoryAccountStore::new();
+    let store: InMemoryAccountStore = InMemoryAccountStore::new();
     
-    assert_eq!(store.get_accounts().len() , 3);
+    assert_eq!(store.query().fetch().len() , 3);
 
-    assert_eq!(store.limit(1).get_accounts().len(), 1);
-    assert_eq!(store.limit(2).get_accounts().len(), 2);
+    assert_eq!(store.query().limit(1).fetch().len(), 1);
+    assert_eq!(store.query().limit(2).fetch().len(), 2);
 }
 
 #[test]
 fn test_offset() {
-    let mut store: InMemoryAccountStore = InMemoryAccountStore::new();
+    let store: InMemoryAccountStore = InMemoryAccountStore::new();
     
-    assert_eq!(store.get_accounts().len() , 3);
+    assert_eq!(store.query().fetch().len() , 3);
 
-    let mut result = store.offset(2).limit(1).get_accounts();
+    let mut result = store.query().offset(2).limit(1).fetch();
     assert_eq!(result[0].name, "Aricane")
-    //assert_eq!(store.offset(2).limit(1).get_accounts().len(), 1);
+}
+
+#[test]
+fn test_by_id() {
+    let store: InMemoryAccountStore = InMemoryAccountStore::new();
     
+    let oracins_account = store.query().with_id(2).unwrap();
+    assert_eq!(oracins_account.name, "oracin")
 }

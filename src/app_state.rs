@@ -61,7 +61,7 @@ impl AppState {
     pub fn get_accounts(&self) -> &Vec<Account> {
         &self.accounts
     }
-    pub fn get_account_by_id(&self, id: u32) -> Result<&Account,bool> {
+    pub fn get_account_by_id(&self, id: usize) -> Result<&Account,bool> {
         for account in &self.accounts {
             if account.get_id() == id {
                 return Ok(&account);
@@ -69,7 +69,7 @@ impl AppState {
         }
         Err(false)
     }
-    pub fn get_account_by_id_mut(&mut self, id: u32) -> Result<Account,bool> {
+    pub fn get_account_by_id_mut(&mut self, id: usize) -> Result<Account,bool> {
         let mut index : usize = 0;
         let mut success: bool = false;
         for account in &self.accounts {

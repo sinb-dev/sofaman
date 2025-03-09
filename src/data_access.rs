@@ -8,8 +8,11 @@ impl RequestParameters {
        Self { filter: None, limit: 30, offset: 0 }
     }
 }
-pub trait ServiceRequest {
-    fn filter(&mut self, value: &str) -> &mut Self;
-    fn limit(&mut self, limit: usize) -> &mut Self;
-    fn offset(&mut self, offset: usize) -> &mut Self;
+
+pub trait ServiceQuery<M> {
+    fn filter(self, value: &str) -> Self;
+    fn limit(self, limit: usize) -> Self;
+    fn offset(self, offset: usize) -> Self;
+    fn fetch(self) -> Vec<M>;
+    fn with_id(self, id: usize) -> Option<M>;
 }
