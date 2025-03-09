@@ -1,3 +1,4 @@
+use crate::data_access::{RequestParameters, ServiceRequest};
 
 #[derive(Clone)]
 pub struct Account {
@@ -74,3 +75,77 @@ pub struct Transaction {
     pub message: String,
     pub amount: i32
 }
+/////////////////////////////
+
+pub trait AccountService : ServiceRequest {
+    fn get_accounts(&self) -> Vec<Account>;
+    fn get_account_by_id(&self, id: u32) -> Account;
+}
+
+pub struct InMemoryAccountStore {
+    request: RequestParameters,
+    accounts: Vec<Account>
+}
+impl InMemoryAccountStore {
+    pub fn new() -> Self {
+        let mut aricane_account = Account::new(3, "Aricane");
+        aricane_account.deposit("Initial", 1000);
+        aricane_account.deposit("Bonus", 1000);
+        aricane_account.withdraw("Favors", 699);
+        aricane_account.deposit("Initial", 1000);
+        aricane_account.deposit("Bonus", 1000);
+        aricane_account.withdraw("Favors", 699);
+        aricane_account.deposit("Initial", 1000);
+        aricane_account.deposit("Bonus", 1000);
+        aricane_account.withdraw("Favors", 699);
+        aricane_account.deposit("Initial", 1000);
+        aricane_account.deposit("Bonus", 1000);
+        aricane_account.withdraw("Favors", 699);
+        aricane_account.deposit("Initial", 1000);
+        aricane_account.deposit("Bonus", 1000);
+        aricane_account.withdraw("Favors", 699);
+
+        Self {
+            request: RequestParameters::new(),
+            accounts: vec!(Account::new(1, "hoxer"), Account::new(2, "oracin"), aricane_account),
+        }
+    }
+}
+impl ServiceRequest for InMemoryAccountStore {
+    fn filter(&mut self, value: &str) -> &mut Self {
+        self.request.filter = Some(String::from(value));
+        self
+    }
+    fn limit(&mut self, limit: usize) -> &mut Self {
+        self.request.limit = limit;
+        self
+    }
+    fn offset(&mut self, offset: usize) -> &mut Self {
+        self.request.offset = offset;
+        self
+    }
+}
+impl AccountService for InMemoryAccountStore {
+    
+    fn get_accounts(&self) -> Vec<Account>
+    {
+        if let Some(filter) = &self.request.filter {
+            self.accounts.iter()
+                .filter(|account| account.name.contains(filter))
+                .skip(self.request.offset)
+                .take(self.request.limit)
+                .cloned()
+                .collect()
+        } else {
+            self.accounts.iter()
+                .skip(self.request.offset)
+                .take(self.request.limit)
+                .cloned()
+                .collect()
+        }
+    }
+    fn get_account_by_id(&self, id: u32) -> Account {
+        todo!()
+    }
+}
+

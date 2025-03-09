@@ -7,6 +7,7 @@
 
 mod tests {
     mod accounting;
+    mod data_access;
 }
 mod pages {
     pub mod page;
@@ -18,6 +19,7 @@ mod widgets {
     pub mod password_input;
     pub mod side_menu;
 }
+mod data_access;
 
 mod app_state;
 mod models {

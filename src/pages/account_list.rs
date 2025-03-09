@@ -7,7 +7,6 @@ use egui_extras::{Column, TableBuilder};
 use super::page::Page;
 use crate::widgets::side_menu::SideMenu;
 
-
 pub struct AccountListPage {
     app_state: Rc<RefCell<AppState>>,
     account_list: AccountList,
@@ -176,7 +175,6 @@ impl AccountList {
                 });
             })
             .body(|mut body| {
-                let mut ui = body.ui_mut();
                 for account in accounts {
                     if filter != "" && !account.name.contains(filter.as_str()) {
                         continue;
@@ -212,9 +210,7 @@ impl AccountList {
 
         ui.response()
     }
-    fn account_row_clicked(&self) {
 
-    }
 }
 
 struct TransactionList {
@@ -244,7 +240,6 @@ impl TransactionList {
     fn ui(&mut self, ui: &mut Ui) -> Response {
         //let app_state = self.app_state.borrow();
         let Self { app_state, filter, account, } = self;
-        let app_state_br = app_state.borrow();
         let mut transactions: Vec<Transaction> = vec!();
         if let Some(acc) = account {
             transactions = acc.get_transactions();
