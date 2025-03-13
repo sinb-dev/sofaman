@@ -4,6 +4,15 @@
 //use egui::{Context, TextEdit, Ui, Widget, WidgetText, Response, Pos2, Rect, Sense, Color32, FontId, TextStyle, FontFamily};
 //use eframe::{egui::{self, TextBuffer}, glow::SHADER_COMPILER};
 
+mod accounting {
+    pub mod data;
+    pub mod models;
+}
+
+mod data {
+    pub mod InMemory;
+    pub mod sqlite;
+}
 
 mod tests {
     mod accounting;
@@ -24,10 +33,12 @@ mod data_access;
 mod app_state;
 mod models {
     pub mod models;
-    pub mod accounting;
+    //pub mod accounting;
 }
 
 
+use data::sqlite::{SqliteAccountService, SqliteServiceManager};
+use data_access::{DataContext, ServiceManager};
 use eframe::egui::{self, ahash::HashMap};
 use std::rc::Rc;
 use std::cell::RefCell;
@@ -39,8 +50,7 @@ use pages::{
     workspace::WorkspacePage,
 };
 fn main() -> eframe::Result {
-    //Load some data
-    
+      
     env_logger::init(); // Log to stderr (if you run with `RUST_LOG=debug`).
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default().with_maximized(true),
@@ -53,8 +63,10 @@ fn main() -> eframe::Result {
             // This gives us image support:
             egui_extras::install_image_loaders(&cc.egui_ctx);
             catppuccin_egui::set_theme(&cc.egui_ctx, catppuccin_egui::MOCHA);
-
-            let app_state = Rc::new(RefCell::new(AppState::new()));
+            let context: DataContext = DataContext {
+                service_manager: Box::new(SqliteServiceManager::new())
+            };
+            let app_state = Rc::new(RefCell::new(AppState::new(context)));
             let my_app = Box::new(MyApp::new(Rc::clone(&app_state)));
    
             Ok(my_app)

@@ -1,4 +1,4 @@
-use crate::{models::accounting::{Account, Transaction}, pages::page::Pages};
+use crate::{accounting::models::{Account, Transaction}, data_access::DataContext, pages::page::Pages};
 pub struct ModelBuffer {
     pub account: Option<Account>,
     pub transaction: Option<Transaction>
@@ -7,10 +7,11 @@ pub struct AppState {
     is_logged_in: bool,
     page: Pages,
     accounts: Vec<Account>,
+    context: DataContext,
     pub buffer: ModelBuffer
 }
 impl AppState {
-    pub fn new() -> Self {
+    pub fn new(context: DataContext) -> Self {
         let mut aricane_account = Account::new(3, "Aricane");
         aricane_account.deposit("Initial", 1000);
         aricane_account.deposit("Bonus", 1000);
@@ -31,11 +32,15 @@ impl AppState {
             is_logged_in : false,
             page : Pages::Login,
             accounts: vec!(Account::new(1, "hoxer"), Account::new(2, "oracin"), aricane_account),
+            context: context,
             buffer: ModelBuffer {
                 account: None,
                 transaction: None,
             }
         }
+    }
+    pub fn get_context(&self) -> &DataContext {
+        &self.context
     }
     pub fn logged_in(&mut self) {
         self.is_logged_in = true;

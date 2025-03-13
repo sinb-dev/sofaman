@@ -1,4 +1,4 @@
-use crate::models::accounting::Account;
+use crate::accounting::models::Account;
 
 #[test]
 fn test_balance() {

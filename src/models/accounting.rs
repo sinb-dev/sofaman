@@ -43,7 +43,11 @@ impl Account {
             Err("Cannot withdraw: Account is closed")
         } else if i_amount > self.balance {
             Err("Balance too low")
-        } else {
+        } else {pub trait AccountService<'a, Q> {
+            fn query(&'a self) -> Q;
+            fn get_account_by_id(&self, id: u32) -> Account;
+        }
+        
             self.transactions.push( Transaction {
                 message : message.to_string(),
                 amount : -i_amount
@@ -83,15 +87,14 @@ pub trait AccountService<'a, Q> {
     fn get_account_by_id(&self, id: u32) -> Account;
 }
 
-pub struct InMemoryAccountStore {
-    request: RequestParameters,
+pub struct InMemoryAccountRepository {
     accounts: Vec<Account>
 }
-pub struct InMemoryAccountStoreQuery<'a> {
+pub struct InMemoryAccountQuery<'a> {
     request: RequestParameters,
-    service: &'a InMemoryAccountStore,
+    service: &'a InMemoryAccountRepository,
 }
-impl<'a> ServiceQuery<Account> for InMemoryAccountStoreQuery<'a> {
+impl<'a> ServiceQuery<Account> for InMemoryAccountQuery<'a> {
     fn filter(mut self, value: &str) -> Self {
         self.request.filter = Some(String::from(value));
         self
@@ -134,7 +137,7 @@ impl<'a> ServiceQuery<Account> for InMemoryAccountStoreQuery<'a> {
         }
     }
 }
-impl InMemoryAccountStore {
+impl InMemoryAccountRepository {
     pub fn new() -> Self {
         let mut aricane_account = Account::new(3, "Aricane");
         aricane_account.deposit("Initial", 1000);
@@ -154,15 +157,14 @@ impl InMemoryAccountStore {
         aricane_account.withdraw("Favors", 699);
 
         Self {
-            request: RequestParameters::new(),
             accounts: vec!(Account::new(1, "hoxer"), Account::new(2, "oracin"), aricane_account),
         }
     }
 }
 
-impl<'a> AccountService<'a, InMemoryAccountStoreQuery<'a>> for InMemoryAccountStore {
-    fn query(&'a self) -> InMemoryAccountStoreQuery<'a> {
-        InMemoryAccountStoreQuery {
+impl<'a> AccountService<'a, InMemoryAccountQuery<'a>> for InMemoryAccountRepository {
+    fn query(&'a self) -> InMemoryAccountQuery<'a> {
+        InMemoryAccountQuery {
             request: RequestParameters::new(),
             service: self
         }
