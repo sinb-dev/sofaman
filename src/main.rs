@@ -10,7 +10,7 @@ mod accounting {
 }
 
 mod data {
-    pub mod InMemory;
+    pub mod in_memory;
     pub mod sqlite;
 }
 
@@ -37,8 +37,8 @@ mod models {
 }
 
 
-use data::sqlite::{SqliteAccountService, SqliteServiceManager};
-use data_access::{DataContext, ServiceManager};
+use data::{sqlite::SqliteServiceLayer, in_memory::InMemoryServiceLayer};
+use data_access::DataContext;
 use eframe::egui::{self, ahash::HashMap};
 use std::rc::Rc;
 use std::cell::RefCell;
@@ -64,7 +64,8 @@ fn main() -> eframe::Result {
             egui_extras::install_image_loaders(&cc.egui_ctx);
             catppuccin_egui::set_theme(&cc.egui_ctx, catppuccin_egui::MOCHA);
             let context: DataContext = DataContext {
-                service_manager: Box::new(SqliteServiceManager::new())
+                services: Box::new(InMemoryServiceLayer::new())
+                //services: Box::new(SqliteServiceLayer::new(":memory:"))
             };
             let app_state = Rc::new(RefCell::new(AppState::new(context)));
             let my_app = Box::new(MyApp::new(Rc::clone(&app_state)));

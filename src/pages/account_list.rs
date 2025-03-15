@@ -1,4 +1,4 @@
-use crate::{accounting::models::{Account, Transaction}, app_state::{self, AppState}, data_access::{Repository, Service}};
+use crate::{accounting::{data::AccountService, models::{Account, Transaction}}, app_state::{self, AppState}};
 use crate::accounting::data;
 use std::rc::Rc;
 use std::cell::RefCell;
@@ -13,7 +13,7 @@ pub struct AccountListPage {
     account_list: AccountList,
     selected_account: Option<Account>,
     show_edit_account: bool,
-    account_service: Box<dyn Service>
+    //account_service: Box<dyn AccountService<dyn ServiceQuery2Trait>>
     //accounts: &'a Vec<Account>
 }
 
@@ -24,14 +24,14 @@ impl Page for AccountListPage
         let app_state_clone = Rc::clone(&app_state);
 
         let app_state_borrow = app_state_clone.borrow();
-        let service_manager = &app_state_borrow.get_context().service_manager;
+        //let service_manager = &app_state_borrow.get_context().service_manager;
 
         Self {
             app_state: Rc::clone(&app_state),
             account_list: AccountList::from_app_state(Rc::clone(&app_state)),
             selected_account: None,
             show_edit_account: false,
-            account_service: service_manager.accounts_service()
+            //account_service: service_manager.accounts_service()
         }
     }
 }
@@ -155,13 +155,15 @@ impl AccountList {
         //let app_state = self.app_state.borrow();
         let Self { app_state, filter, selected_account, selected_account_id, transaction_list } = self;
         let app_state_br = app_state.borrow();
-        let service_manager = &app_state_br.get_context().service_manager;
-        let service = service_manager.accounts_service();
-        let repository = service.accounts();
+        // let services = &app_state_br.get_context().services;
+        // let service = service_manager.accounts();
+        let account_service = &app_state_br.get_context().services.accounting();
+        
 
 
         // let accounts: &Vec<Account> = app_state_br.get_accounts();
-        let accounts: Vec<Account> = repository.query().fetch();
+        //let accounts: Vec<Account> = repository.query().fetch();
+        let accounts: Vec<Account> = account_service.get_accounts();
 
         let search_label = ui.label("Search");
         ui.vertical(|ui| {
